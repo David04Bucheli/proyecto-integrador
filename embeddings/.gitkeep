@@ -1,0 +1,3 @@
+Esta carpeta la llena notebooks/Fase1_Baselines_y_Auditoria.ipynb (sección 5)
+al extraer embeddings de los tres codificadores sobre sub50. Los .npz no se
+versionan (ver .gitignore): son artefactos regenerables, no código fuente.
