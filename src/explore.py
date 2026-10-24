@@ -38,7 +38,6 @@ def photometry_lengths(hf_split, n: Optional[int] = None) -> pd.Series:
 
 def photometry_channel_stats(hf_split, n: Optional[int] = 2000) -> pd.DataFrame:
     #por canal de la fotometría: media/desv./mín/máx sobre todos los puntos + qué fracción de los objetos lo tiene cte a lo largo de la curva
-    derivados de un valor por objeto, p. ej. período o amplitud)."""
     idx = _sample_indices(len(hf_split), n)
     pts, const_flags = [], []
     for i in idx:
