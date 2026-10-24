@@ -1,11 +1,6 @@
 # -*- coding: utf-8 -*-
-"""Utilidades del Entregable 2: entrenar con checkpoints, guardar todo lo que
-hace falta para votar/extraer embeddings sin reentrenar, y predecir con
-probabilidades.
-
-No modifica engine.py: reutiliza train_one_epoch y evaluate tal cual, así el
-protocolo de entrenamiento (Adam, lr 1e-3, 20 épocas, batch 32) es el mismo
-del Entregable 1.
+"""para entrenar con checkpoints, guardar todo lo que hace falta para votar/extraer embeddings sin reentrenar, y predecir con
+probabilidades
 """
 import json
 import time
@@ -23,7 +18,7 @@ def count_parameters(model: nn.Module) -> int:
     return int(sum(p.numel() for p in model.parameters() if p.requires_grad))
 
 
-#igual que engine.fit, pero guarda (en memoria) el estado de la última época y el de la época con mejor macro-F1 en validación
+#guarda el estado de la última época y el de la época con mejor macro-F1 en validation
 def fit_with_checkpoints(model: nn.Module, train_loader, val_loader, forward_fn: Callable,
                          device: str = "cpu", num_epochs: int = config.NUM_EPOCHS,
                          lr: float = config.LEARNING_RATE,
@@ -79,8 +74,6 @@ def save_checkpoint(path, fit_result: Dict, extra: Optional[Dict] = None) -> Non
 
 
 def load_checkpoint_into(model: nn.Module, path, which: str = "last", device: str = "cpu") -> Dict:
-    """Carga 'last' (modelo de la última época, como en el Entregable 1) o 'best'
-    (mejor macro-F1 en validación) en un modelo ya construido. Devuelve el checkpoint completo."""
     assert which in ("last", "best")
     ckpt = torch.load(path, map_location="cpu")
     model.load_state_dict(ckpt[f"{which}_state"])
@@ -96,7 +89,7 @@ def save_history_json(path, history: List[Dict], extra: Optional[Dict] = None) -
         json.dump({"history": history, "extra": extra or {}}, f, indent=2, ensure_ascii=False)
 
 
-#predice un split completo y devuelve probabilidades (softmax), etiquetas y predicciones. El loader debe tener shuffle=False para que las tres modalidades queden alineadas por índice
+#predice un split completo y devuelve probabilidades, etiquetas y predicciones
 @torch.no_grad()
 def predict_proba(model: nn.Module, dataloader, device: str, forward_fn: Callable) -> Dict[str, np.ndarray]:
     model.eval()
