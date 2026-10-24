@@ -1,4 +1,3 @@
-# Python
 __pycache__/
 *.pyc
 *.pyo
@@ -7,24 +6,17 @@ __pycache__/
 .venv/
 venv/
 
-# Notebooks
 .ipynb_checkpoints/
 
-# Artefactos generados por el entrenamiento (regenerables, no son código
-# fuente): embeddings extraídos y checkpoints de modelos.
 embeddings/*.npz
 checkpoints/
 *.pt
 *.pth
 
-# Datos descargados de Hugging Face si alguna vez se cachean localmente
 data/
 .cache/
 
-# Sistema
 .DS_Store
 
-# Entregable 2: salidas pesadas de la corrida (regenerables). Se versionan
-# results.json, historiales (.json), figuras y predicciones de test.
 outputs_e2/checkpoints/
 outputs_e2/embeddings/
