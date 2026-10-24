@@ -41,7 +41,7 @@ instalarlo: basta con ejecutar todo desde la raíz del repositorio.
 
 ```bash
 git clone <url-de-este-repositorio>
-cd astro_project
+cd proyecto-integrador
 python -m venv .venv && source .venv/bin/activate   # opcional pero recomendado
 pip install -r requirements.txt
 ```
