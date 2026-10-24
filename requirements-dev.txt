@@ -1,4 +1,3 @@
 # Dependencias solo para regenerar notebooks/Fase1_Baselines_y_Auditoria.ipynb
-# a partir de src/ (notebooks/build_notebook.py). No hacen falta para
-# entrenar, evaluar ni correr las pruebas de humo.
+# a partir de src/ (notebooks/build_notebook.py)
 nbformat>=5.9
