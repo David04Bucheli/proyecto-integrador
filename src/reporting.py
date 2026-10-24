@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Gráficos y tablas para el Entregable 2. Solo grafican lo que se les pasa."""
+"""gráficos y tablas para el entregable 2"""
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -17,7 +17,6 @@ def _plt():
 
 def plot_confusion_matrix(cm: np.ndarray, class_names: List[str] = config.CLASS_NAMES,
                           title: str = "", normalize: bool = True, path: Optional[str] = None):
-    """Matriz 10x10. normalize=True muestra el recall por fila (cada fila suma 1)."""
     plt = _plt()
     cm = np.asarray(cm, dtype=float)
     shown = cm / np.maximum(cm.sum(axis=1, keepdims=True), 1) if normalize else cm
@@ -43,7 +42,6 @@ def plot_confusion_matrix(cm: np.ndarray, class_names: List[str] = config.CLASS_
 
 
 def plot_history(histories: Dict[str, List[Dict]], path: Optional[str] = None):
-    """Curvas por época (loss y macro-F1 de validación) de varios modelos."""
     plt = _plt()
     fig, axes = plt.subplots(1, 2, figsize=(11, 4))
     for name, h in histories.items():
@@ -61,7 +59,6 @@ def plot_history(histories: Dict[str, List[Dict]], path: Optional[str] = None):
 
 
 def per_class_table(metrics_by_name: Dict[str, Dict], metric: str = "f1") -> pd.DataFrame:
-    """Filas = clases, columnas = modelos/estrategias; valor = f1 (o precision/recall) por clase."""
     cols = {name: {c: v[metric] for c, v in m["per_class"].items()} for name, m in metrics_by_name.items()}
     return pd.DataFrame(cols)
 
