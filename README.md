@@ -3,11 +3,6 @@
 Proyecto integrador — David Sebastián Bucheli Cabezas, Ingeniería en Ciencias
 de la Computación, USFQ. Tutor: Daniel Riofrío.
 
-Código de la Fase 1: auditoría de integridad de datos, los tres modelos
-unimodales de referencia (fotometría, espectros, metadatos), y la extracción
-de embeddings para la fusión por concatenación. Dataset:
-[`AstroMLCore/AstroM3Processed`](https://huggingface.co/datasets/AstroMLCore/AstroM3Processed)
-(Hugging Face).
 
 ## Estructura del repositorio
 
@@ -53,7 +48,7 @@ pip install -r requirements.txt
 
 ## Cómo reproducir, paso a paso
 
-**1. Prueba de humo (sin internet, ~1 minuto).** Confirma que el entorno
+**1. Prueba de humo (sin internet).** Confirma que el entorno
 está bien configurado y que el pipeline completo (collate, los tres
 modelos, el loop de entrenamiento, la extracción de embeddings y la lógica
 de auditoría de fuga) corre sin errores estructurales, usando datos
@@ -98,63 +93,6 @@ extracción de embeddings. El propio notebook escribe los archivos de `src/`
 en el entorno de ejecución (celdas `%%writefile`), así que no hace falta
 subir la carpeta por separado a Colab.
 
-> ⚠️ El notebook incluido en este repositorio (`notebooks/Fase1_Baselines_y_Auditoria.ipynb`)
-> ya se corrió completo hasta la sección 4 (auditoría + los tres baselines
-> sobre `sub10` y `sub50`) y se guardó **con las salidas visibles**
-> (historial de épocas, métricas de test, reporte por clase). La sección 5
-> (extracción de embeddings) todavía no se ha ejecutado — ver "Estado
-> actual" abajo. Si vuelves a correr el notebook completo, revisa que esa
-> sección también termine y quede con sus salidas antes de dar por cerrado
-> este entregable.
-
-## Estado actual (honesto, a la fecha de este commit)
-
-- ✅ Auditoría de fuga de datos: implementada y **ejecutada contra datos
-  reales**, con hallazgo real documentado (AstroM3Processed no tiene columna
-  de ID; se audita por huella digital de metadatos). Resultado: 0
-  intersecciones entre `full_42/train` (17063 objetos) y `sub50_42/test`
-  (1111 objetos) — sin fuga detectada.
-- ✅ Los tres baselines unimodales (GRU-fotometría, CNN 1D-espectros,
-  MLP-metadatos) están **entrenados y evaluados sobre datos reales**, con
-  salidas guardadas en el notebook:
-  - Sobre `sub10` (test, 220 objetos): GRU 90.5 % accuracy / 0.904 macro-F1,
-    MLP 75.0 % / 0.734, CNN 1D 49.1 % / 0.453.
-  - Generalización `sub10 → test de sub50` (modelos entrenados en `sub10`,
-    nunca vieron `sub50`): GRU 66.3 % / 0.663, MLP 68.3 % / 0.630,
-    CNN 1D 55.0 % / 0.458.
-  - Entrenamiento formal sobre `sub50` (evaluado en su propio test, 1111
-    objetos): GRU 88.6 % / 0.897, MLP 82.0 % / 0.788, CNN 1D 60.9 % / 0.478.
-  - La fotometría (GRU) es, con estos datos, la modalidad más fuerte de las
-    tres; el espectro (CNN 1D) es sistemáticamente la más débil.
-- ⏳ Extracción de embeddings (sección 5 del notebook, insumo para la fusión
-  por concatenación): el código está listo y validado **estructuralmente**
-  con `tests/test_smoke.py` (datos sintéticos), pero la celda todavía no se
-  ha corrido contra los modelos ya entrenados sobre `sub50`.
-- ⏳ Fusión por votación, concatenación y transferencia de aprendizaje:
-  siguiente fase del proyecto (Entregable 2).
-
-## Entregable 2: sub50 reentrenado y votación 2-de-3
-
-Código nuevo, en módulos aparte (no modifica los módulos del Entregable 1):
-`runs.py`, `fusion.py`, `explore.py`, `reporting.py`. El notebook
-`notebooks/Entregable2_Sub50_y_Votacion.ipynb` hace, en orden: exploración de
-`sub50`, reentrenamiento de los tres modelos con el mismo protocolo del
-Entregable 1 (guardando checkpoints, historiales y probabilidades), evaluación
-con matrices de confusión, votación 2-de-3 y extracción de embeddings.
-
-```bash
-python tests/test_fusion.py          # lógica de la votación (sin torch ni internet)
-python tests/test_entregable2.py     # flujo completo con datos sintéticos
-```
-
-Estas pruebas validan que el código corre; **no producen resultados**. Los
-resultados del Entregable 2 salen de ejecutar el notebook con el dataset real y
-quedan en `outputs_e2/` (`results.json`, historiales, figuras y predicciones).
-Checkpoints (`*.pt`) y embeddings (`*.npz`) se generan pero no se versionan.
-
-Decisiones de protocolo: modelo principal = última época (igual que el
-Entregable 1); en la votación, la regla de desempate cuando los tres modelos
-difieren se elige con validación, nunca con test.
 
 ## Semilla: no cambiar sin volver a auditar
 
@@ -170,31 +108,5 @@ Nota sobre la auditoría: como los subsets de AstroM3Processed se muestrean
 de los splits de `full`, la intersección vacía entre `sub50/test` y
 `full/train` está prácticamente garantizada por construcción del dataset,
 siempre que se mantenga la semilla 42. La auditoría es, por tanto, un
-control de cordura necesario y bien ejecutado, no un hallazgo metodológico
-nuevo — así se reporta también en el documento final.
+control necesario 
 
-## Regenerar el notebook desde `src/`
-
-Si cambias algo en `src/`, el notebook no se actualiza solo. Para
-reconstruirlo:
-
-```bash
-pip install -r requirements-dev.txt
-python notebooks/build_notebook.py
-```
-
-⚠️ Esto **reescribe el notebook desde cero** y borra cualquier salida de
-celdas ya ejecutadas. Si ya entrenaste en Colab y quieres conservar esas
-salidas, no lo vuelvas a correr sobre ese mismo archivo: aplica el cambio de
-código a mano, o guarda la versión ejecutada con otro nombre antes de
-regenerar. (Esto es justamente lo que causó que una versión anterior del
-notebook se entregara sin salidas de entrenamiento.)
-
-## Próximos pasos
-
-Con `embeddings/fused_train.npz`, `fused_validation.npz` y `fused_test.npz`
-generados, la siguiente fase es entrenar el clasificador de la fusión por
-concatenación sobre esos vectores, implementar la fusión por votación
-mayoritaria, y evaluar la transferencia de aprendizaje desde
-`AstroM3-CLIP` — todo sobre `sub50`, usando la infraestructura de cómputo de
-la universidad.
