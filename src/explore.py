@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
-"""Exploración de datos pedida por el tutor (deuda del Entregable 1).
-
-Todas las funciones leen splits reales de Hugging Face (los que devuelve
-datasets.load_subset) y devuelven tablas (pandas) con lo MEDIDO; no asumen
-nada sobre el significado de los canales: sirven justamente para averiguarlo.
+"""exploración de datos:
+todas las funciones leen splits reales y devuelven tablas con lo medido
 """
 from typing import Dict, List, Optional
 
@@ -22,7 +19,6 @@ def _sample_indices(n_total: int, n: Optional[int], seed: int = config.SEED) -> 
 
 
 def class_distribution(splits: Dict[str, object], class_names: List[str] = config.CLASS_NAMES) -> pd.DataFrame:
-    """splits: {'train': hf_split, 'validation': ..., 'test': ...}. Filas = clases."""
     cols = {}
     for name, ds in splits.items():
         labels = np.asarray(ds[LABEL])
@@ -35,14 +31,13 @@ def class_distribution(splits: Dict[str, object], class_names: List[str] = confi
 
 
 def photometry_lengths(hf_split, n: Optional[int] = None) -> pd.Series:
-    """Número de puntos de cada curva de luz."""
+    #n° de puntos de cada curva de luz
     idx = _sample_indices(len(hf_split), n)
     return pd.Series([len(hf_split[int(i)][PHOT]) for i in idx], name="longitud")
 
 
 def photometry_channel_stats(hf_split, n: Optional[int] = 2000) -> pd.DataFrame:
-    """Por canal de la fotometría: media/desv./mín/máx sobre todos los puntos, y qué fracción de
-    los objetos lo tiene CONSTANTE a lo largo de la curva (esperable en canales auxiliares
+    #por canal de la fotometría: media/desv./mín/máx sobre todos los puntos + qué fracción de los objetos lo tiene cte a lo largo de la curva
     derivados de un valor por objeto, p. ej. período o amplitud)."""
     idx = _sample_indices(len(hf_split), n)
     pts, const_flags = [], []
@@ -60,8 +55,7 @@ def photometry_channel_stats(hf_split, n: Optional[int] = 2000) -> pd.DataFrame:
 
 
 def spectra_channel_stats(hf_split, n: Optional[int] = 1000) -> pd.DataFrame:
-    """Por canal del espectro (3 canales): escala, ceros y NaN. Sirve para diagnosticar la CNN
-    (¿escalas muy distintas entre canales? ¿espectros sin normalizar?)."""
+    #por canal del espectro: escala, ceros y NaN (para diagnosticar la CNN)
     idx = _sample_indices(len(hf_split), n)
     arrs = np.stack([np.asarray(hf_split[int(i)][SPEC], dtype=np.float64) for i in idx])   # (n,3,L)
     return pd.DataFrame({
@@ -74,7 +68,7 @@ def spectra_channel_stats(hf_split, n: Optional[int] = 1000) -> pd.DataFrame:
 
 
 def metadata_stats(hf_split, n: Optional[int] = None) -> pd.DataFrame:
-    """Por columna de metadatos (34): escala, NaN y si es constante."""
+    #por columna de metadatos: escala, NaN y si es cte
     idx = _sample_indices(len(hf_split), n)
     m = np.stack([np.asarray(hf_split[int(i)][META], dtype=np.float64).ravel() for i in idx])
     return pd.DataFrame({
@@ -84,6 +78,6 @@ def metadata_stats(hf_split, n: Optional[int] = None) -> pd.DataFrame:
 
 
 def first_example_per_class(hf_split, n_classes: int = config.NUM_CLASSES) -> Dict[int, int]:
-    """Índice del primer objeto de cada clase (para graficar ejemplos)."""
+    #indice del 1er objeto de cada clase para graficar ejemplos)
     labels = np.asarray(hf_split[LABEL])
     return {c: int(np.where(labels == c)[0][0]) for c in range(n_classes) if (labels == c).any()}
