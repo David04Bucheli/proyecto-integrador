@@ -28,3 +28,6 @@ data/
 # results.json, historiales (.json), figuras y predicciones de test.
 outputs_e2/checkpoints/
 outputs_e2/embeddings/
+outputs_e3/checkpoints/
+outputs_e3/embeddings/
+external/
